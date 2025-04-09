@@ -12,6 +12,8 @@
  DFRobotDFPlayerMini thePlayer;
  const int laser1=A0;
  const int diode1=A1;
+ const int lightThreshold = 3000;
+ bool beamPreviouslyIntact = true;
  
  SYSTEM_MODE(SEMI_AUTOMATIC);
  
@@ -46,10 +48,13 @@
   int sensorValue = analogRead (diode1);
   Serial.printf("light level: %d\n", sensorValue);
 
-   if (nextButton.isClicked()) {
+  bool beamIsBroken = sensorValue<lightThreshold;
+
+  if (beamIsBroken && beamPreviouslyIntact) {
      Serial.println("Next Song");
      thePlayer.next();
      thePlayer.next();
    }
+   beamPreviouslyIntact =!beamIsBroken;
  }
  
