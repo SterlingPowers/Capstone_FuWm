@@ -12,12 +12,10 @@
  
  Button nextButton(S3);  
  DFRobotDFPlayerMini thePlayer;
- const int diode1=A2;
+ const int diode1=A0;
  const int diode2=A1;
- const int diode3=A0;
- const int laser1=A5;
- const int laser2=S4;
- const int laser3=S3;
+ const int diode3=A2;
+ 
 
  const int lightThreshold = 3000;
  bool leftBeamPreviouslyIntact = true;
@@ -26,9 +24,7 @@
  SYSTEM_MODE(SEMI_AUTOMATIC);
  
  void setup() {
-  pinMode (laser1, OUTPUT);
-  pinMode (laser2, OUTPUT);
-  pinMode (laser3, OUTPUT);
+
   pinMode (diode1, INPUT);
   pinMode (diode2, INPUT);
   pinMode (diode3, INPUT);
@@ -54,17 +50,15 @@
  }
  
  void loop() {
-  digitalWrite (laser1, HIGH);
-  digitalWrite (laser2, HIGH);
-  digitalWrite (laser3, HIGH);
-  delay (100);
-
   int sensorValue1 = analogRead (diode1);
   Serial.printf("Left: %d\n", sensorValue1);
+  delay (500);
   int sensorValue2 = analogRead (diode2);
   Serial.printf("Center: %d\n", sensorValue2);
+  delay (500);
   int sensorValue3 = analogRead (diode3);
   Serial.printf("Right: %d\n", sensorValue3);
+  delay (500);
 
   bool leftBeamIsBroken = sensorValue1<lightThreshold;
   bool rightBeamIsBroken = sensorValue3<lightThreshold;
@@ -72,14 +66,14 @@
   if (leftBeamIsBroken && leftBeamPreviouslyIntact) {
      Serial.println("Previous Song");
      thePlayer.previous();
-     thePlayer.previous();
+  
    }
    leftBeamPreviouslyIntact =!leftBeamIsBroken;
 
    if (rightBeamIsBroken && rightBeamPreviouslyIntact) {
     Serial.println("Next Song");
     thePlayer.next();
-    thePlayer.next();
+ 
   }
   rightBeamPreviouslyIntact =!rightBeamIsBroken;
 }

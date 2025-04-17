@@ -1,35 +1,39 @@
-#include <SPI.h>
-#include "Adafruit_GFX.h"
-#include "GC9A01A.h"
+#include "Particle.h"
+#include "neopixel.h"
 
-// Define pins
-#define TFT_CS   D7
-#define TFT_DC   D5
-#define TFT_RST  D6
+SYSTEM_MODE(SEMI_AUTOMATIC);
 
-// Set up display instance
-GC9A01A tft(TFT_CS, TFT_DC, TFT_RST);
+// For WS2812B LED strip on pin D5
+const int PIXEL_PIN = D5;
+const int PIXEL_COUNT = 8;
+const int BRIGHTNESS = 50;
+
+Adafruit_NeoPixel strip(PIXEL_COUNT, PIXEL_PIN, WS2812B);
 
 void setup() {
-  // Initialize serial for debugging
+  strip.begin();
+  strip.setBrightness(BRIGHTNESS);
+  strip.show(); // Start with all off
+
   Serial.begin(9600);
-  delay(1000);
-  Serial.println("Initializing display...");
-
-  // Start the display
-  tft.begin();
-  tft.setRotation(0); // 0–3 for different orientations
-
-  // Fill screen with a color
-  tft.fillScreen(GC9A01A_BLUE);
-  
-  // Draw some text
-  tft.setTextColor(GC9A01A_WHITE);
-  tft.setTextSize(2);
-  tft.setCursor(20, 120);
-  tft.print("Hello, Photon2!");
+  waitFor(Serial.isConnected, 5000);
+  Serial.println("NeoPixel test started");
 }
 
 void loop() {
-  // nothing for now
+  // Cycle through Red, Green, Blue, Warm White
+  colorWipe(strip.Color(255, 0, 0), "Red");
+  colorWipe(strip.Color(0, 255, 0), "Green");
+  colorWipe(strip.Color(0, 0, 255), "Blue");
+  colorWipe(strip.Color(255, 147, 41), "Warm White");
+  colorWipe(strip.Color(0, 0, 0), "Off");
+}
+
+void colorWipe(uint32_t color, const char* label) {
+  for (int i = 0; i < PIXEL_COUNT; i++) {
+    strip.setPixelColor(i, color);
+  }
+  strip.show();
+  Serial.println(label);
+  delay(1000);
 }

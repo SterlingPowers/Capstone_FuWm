@@ -3,39 +3,58 @@
  * Author: Sterling Powers
  * Date: 
  */
-#include "Particle.h"
 
- #define TRIG_PIN A5
- #define ECHO_PIN A2
+ #include "Particle.h"
+
+ #define TRIG_PIN D7
+ #define ECHO_PIN D6
+ 
+ SYSTEM_MODE(SEMI_AUTOMATIC);
+ 
+ long pulseIn1(uint16_t pin, uint8_t state, unsigned long timeout = 1000000L) {
+   unsigned long start = micros();
+   while (digitalRead(pin) != state) {
+     if (micros() - start > timeout) return 0;
+   }
+ 
+   unsigned long pulseStart = micros();
+   while (digitalRead(pin) == state) {
+     if (micros() - pulseStart > timeout) return 0;
+   }
+ 
+   return micros() - pulseStart;
+ }
  
  void setup() {
    Serial.begin(9600);
+   waitFor(Serial.isConnected, 10000);
+ 
+   delay(2000); 
+ 
    pinMode(TRIG_PIN, OUTPUT);
    pinMode(ECHO_PIN, INPUT);
+ 
+   Serial.println("HC-SR04 Ready!");
  }
  
  void loop() {
    long duration_us;
    float distance_cm;
  
-   // Clear the trigger
    digitalWrite(TRIG_PIN, LOW);
    delayMicroseconds(2);
- 
-   // Send 10µs pulse to start measurement
    digitalWrite(TRIG_PIN, HIGH);
    delayMicroseconds(10);
    digitalWrite(TRIG_PIN, LOW);
  
-   // Measure echo duration
-   duration_us = pulseIn(ECHO_PIN, HIGH);
+   duration_us = pulseIn1(ECHO_PIN, HIGH);
  
-   // Calculate distance in millimeters
-   distance_cm = (duration_us * 0.343) / 58.0;
- 
-   Serial.print("Distance: ");
-   Serial.print(distance_cm);
-   Serial.println(" cm");
+   if (duration_us > 0) {
+     distance_cm = (duration_us * 0.0343) / 2.0;
+     Serial.printf("Distance: %.2f cm\n", distance_cm);
+   } else {
+     Serial.println("No pulse detected");
+   }
  
    delay(500);
  }
